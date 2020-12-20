@@ -1,0 +1,31 @@
+frr version 7.0+cl4u3
+frr defaults datacenter
+hostname {{ device.hostname }}
+log syslog informational
+service integrated-vtysh-config
+{% set interfaces = bgp.bgp_interfaces %}
+{% for interface in interfaces %}
+ interface {{ interface }}
+ ipv6 nd ra-interval 10
+ no ipv6 nd suppress-ra
+{% endfor %}
+router bgp {{ bgp.bgp_as }}
+bgp router-id {{ bgp.bgp_rid }}
+{% set interfaces = bgp.bgp_interfaces %}
+{% for interface in interfaces %}
+ neighbor {{ interface }} interface remote-as {{ interfaces[interface]['bgp_type'] }}
+{% endfor %}
+ address-family ipv4 unicast
+{% for nwrk in bgp.bgp_networks %}
+ network {{ nwrk }}
+{% endfor %}
+exit-address-family
+address-family l2vpn evpn
+{% for interface in interfaces %}
+neighbor {{ interface }} activate
+{% endfor %}
+{% if device.type == "leaf" %}
+advertise-all-vni
+{% endif %}
+exit-address-family
+line vty
