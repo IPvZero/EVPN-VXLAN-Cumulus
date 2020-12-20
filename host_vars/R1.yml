@@ -1,0 +1,36 @@
+---
+device:
+  hostname: "Spine1"
+  type: "spine"
+
+bgp:
+  bgp_as: "65001"
+  bgp_rid: "10.10.10.1"
+  bgp_interfaces:
+    swp1:
+      bgp_type: external
+    swp2:
+      bgp_type: external
+    swp3:
+      bgp_type: external
+    swp4:
+      bgp_type: external
+  bgp_networks:
+    - 10.10.10.1/32
+
+interfaces:
+  mgmt: "192.168.31.101/24"
+  loopback: "10.10.10.1/32"
+  switchports:
+    swp1:
+      edge: "False"
+      vlan: {}
+    swp2:
+      edge: "False"
+      vlan: {}
+    swp3:
+      edge: "False"
+      vlan: {}
+    swp4:
+      edge: "False"
+      vlan: {}
