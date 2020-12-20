@@ -1,0 +1,62 @@
+auto lo
+iface lo inet loopback
+    # The primary network interface
+    address {{ interfaces.loopback }}
+
+# The primary network interface
+auto eth0
+iface eth0
+    address {{ interfaces.mgmt }}
+    vrf mgmt
+{% set ifaces = interfaces.switchports %}
+{% for iface in ifaces %}
+
+auto {{ iface }}
+iface {{ iface }}
+{% if ifaces[iface]["edge"] == "True" %}
+    bridge-access {{ ifaces[iface]["vlan"] }}
+{% endif %}
+{% endfor %}
+
+{% if device.type == "leaf" %}
+auto bridge
+iface bridge
+    bridge-ports{% for n in VXLAN["vxlans"] %} vxlan{{ n.vxlan_id }}{% endfor %}
+ {% for iface in ifaces %}{% if ifaces[iface]["edge"] == "True" %}{{ iface  }} {% endif %}
+{% endfor %}
+
+    bridge-vids{% for n in VXLAN["vxlans"] %} {{ n.vlan_id }}{% endfor %}
+
+    bridge-vlan-aware yes
+{% endif%}
+
+auto mgmt
+iface mgmt
+    address 127.0.0.1/8
+    address ::1/128
+    vrf-table auto
+
+{% if device.type == "leaf" %}
+{% for iface in ifaces %}
+{% if ifaces[iface]["edge"] == "True" %}
+auto vlan{{ ifaces[iface]["vlan"] }}
+iface vlan{{ ifaces[iface]["vlan"] }}
+    ip-forward off
+    vlan-id {{ ifaces[iface]["vlan"] }}
+    vlan-raw-device bridge
+
+{% endif %}
+{% endfor %}
+{% for n in VXLAN["vxlans"] %}
+auto vxlan{{ n.vxlan_id }}
+iface vxlan{{ n.vxlan_id }}
+    bridge-access {{ n.vlan_id }}
+    bridge-arp-nd-suppress on
+    bridge-learning off
+    mstpctl-bpduguard yes
+    mstpctl-portbpdufilter yes
+    vxlan-id {{ n.vxlan_id }}
+    vxlan-local-tunnelip {{ bgp.bgp_rid }}
+
+{% endfor %}
+{% endif %}
