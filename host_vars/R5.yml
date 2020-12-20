@@ -1,0 +1,39 @@
+---
+device:
+  hostname: "Leaf3"
+  type: "leaf"
+
+bgp:
+  bgp_as: "65003"
+  bgp_rid: "10.10.10.5"
+  bgp_interfaces:
+    swp1:
+      bgp_type: external
+    swp2:
+      bgp_type: external
+  bgp_networks:
+    - 10.10.10.5/32
+
+interfaces:
+  mgmt: "192.168.31.105/24"
+  loopback: "10.10.10.5/32"
+  switchports:
+    swp1:
+      edge: "False"
+      vlan: {}
+    swp2:
+      edge: "False"
+      vlan: {}
+    swp4:
+      edge: "True"
+      vlan: "200"
+    swp5:
+      edge: "True"
+      vlan: "100"
+
+VXLAN:
+  vxlans:
+    - vxlan_id: 100100
+      vlan_id: 100
+    - vxlan_id: 200200
+      vlan_id: 200
