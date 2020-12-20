@@ -1,0 +1,41 @@
+---
+
+- hosts: all
+  become: true
+
+  tasks:
+  - name: Initialise Zebra
+    lineinfile:
+      path: /etc/frr/daemons
+      regexp: '^zebra='
+      line: 'zebra=yes'
+    notify: Restart frr service
+
+  - name: Initialise BGP
+    lineinfile:
+      path: "/etc/frr/daemons"
+      regexp: '^bgpd='
+      line: 'bgpd=yes'
+    notify: Restart frr service
+
+  - name: Load Interface configuration
+    template:
+      src: "templates/interfaces.j2"
+      dest: "/etc/network/interfaces"
+    notify: reload interfaces
+
+  - name: Load BGP configuration
+    template:
+      src: "templates/bgp.j2"
+      dest: "/etc/frr/frr.conf"
+    notify: reload frr
+
+  handlers:
+    - name: Restart frr service
+      systemd:
+        name: frr.service
+        state: restarted
+    - name: reload interfaces
+      command: /sbin/ifreload -a
+    - name: reload frr
+      command: systemctl reload frr.service
