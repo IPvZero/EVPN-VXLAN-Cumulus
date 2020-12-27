@@ -2,6 +2,15 @@
 
 ### Automating Cumulus Flat Files
 
+IMPORTANT NOTE: Device R3 and R4 will not learn each others loopbacks. Nor will device R5 and R6 learn each others.
+This is because they are withing the same Autonomous System and have learned that prefix via the Spine. This is a BGP loop prevention mechanism and is expected behaviour. If you want to have traffic to pass freely between these devices, change the device autonomous system value for the 4 leafs
+in the host_vars directory to ensure that all leaf have unique ASNs.
+i.e.:
+
+R3: 65003
+R4: 65004
+R5: 65005
+R6: 65006
 
 ![alt text](https://github.com/IPvZero/EVPN-VXLAN-Cumulus/blob/main/images/evpn.png?raw=true)
 
